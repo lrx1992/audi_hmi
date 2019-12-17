@@ -1,0 +1,8 @@
+<launch>
+<!-- <param name="/route" type="str" value="7,220,230" /> -->
+<!--<param name="/use_sim_time" type="bool" value="true"/>-->
+<!--<param name="/map/filename" type="str" value="$(find map_api)/data/shunyizhongguan_demo.xodr"/>-->
+<!--<node name="envlane_publisher" pkg="map_api" type="envlane_publisher" output="screen"/> -->
+<node pkg="rosbag" type="play" name="playbag" output="screen" args="--clock -l /home/lrxin/2019-12-11-17-40-20.bag"/>
+<!-- <node name="web_backend" pkg="web_backend" type="web_backend" output="screen"/> -->
+</launch>
