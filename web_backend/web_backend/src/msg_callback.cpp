@@ -234,12 +234,13 @@ void pointCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
 }
 
 int first_speed_limit = 0;
+int speed_limit = 80;
 void timerCallback(const ros::TimerEvent& event,ros::Publisher& pub)
 {
   if(first_speed_limit == 0){
     nlohmann::json event_data;
     event_data["api"] = "/info_event";
-    event_data["data"][0]["speed_limit"] = 80;
+    event_data["data"][0]["speed_limit"] = speed_limit;
     send_queues["event_info"].Clear();
     send_queues["event_info"].Push(event_data);
     send_queues_flag["event_info"] = "new";
@@ -262,7 +263,7 @@ void eventCallback(const autodrive_msgs::EventInfo::ConstPtr& msg)
   nlohmann::json event_data;
   event_data["api"] = "/info_event";
   event_data["data"][0]["content"] = msg->Reason;
-  event_data["data"][0]["speed_limit"] = 80;
+  event_data["data"][0]["speed_limit"] = speed_limit;
   AdUtil::send_by_udp(kombi_ip,9999,to_string(msg->Reason));
 
   //event_data["data"][0]["status"] = "on" / "off";
@@ -290,11 +291,20 @@ void eventCallback(const autodrive_msgs::EventInfo::ConstPtr& msg)
     lamp_status = 2;
     if(msg->Reason == 4)
     {
+      speed_limit = 40;
       event_data["data"][0]["speed_limit"] = 40;
       AdUtil::send_by_udp(pi_ip,9090,"audio:speed_40");
     }
-    if(msg->Reason == 5) event_data["data"][0]["speed_limit"] = 60;
-    if(msg->Reason == 6) event_data["data"][0]["speed_limit"] = 80;
+    if(msg->Reason == 5)
+    {
+      speed_limit = 60;
+      event_data["data"][0]["speed_limit"] = 60;
+    } 
+    if(msg->Reason == 6)
+    {
+      speed_limit = 80;
+      event_data["data"][0]["speed_limit"] = 80;
+    }
     AdUtil::send_by_udp(pi_ip,9090,"data:1");
     event_data["data"][0]["status"] = "on";
   }
