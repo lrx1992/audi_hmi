@@ -331,7 +331,7 @@ void eventCallback(const autodrive_msgs::EventInfo::ConstPtr& msg)
     if(msg->Reason == 13)
     {
       AdUtil::send_by_udp(pi_ip,9090,"audio:wrong_dir");
-    }
+    }   
     event_data["data"][0]["status"] = "on";    
   }
   else if(msg->Reason == 14 or msg->Reason == 15 or msg->Reason == 16)
@@ -340,6 +340,18 @@ void eventCallback(const autodrive_msgs::EventInfo::ConstPtr& msg)
     AdUtil::send_by_udp(pi_ip,9090,"data:5");
     event_data["data"][0]["status"] = "on";
   }
+  if(msg->Reason == 17)
+  {
+    lamp_status = 3;
+    AdUtil::send_by_udp(pi_ip,9090,"data:2");
+    event_data["data"][0]["status"] = "off";
+  }
+  if(msg->Reason == 18)
+  {
+    lamp_status = 4;
+    AdUtil::send_by_udp(pi_ip,9090,"data:3");
+    event_data["data"][0]["status"] = "off";
+  } 
   send_queues["event_info"].Clear();
   send_queues["event_info"].Push(event_data);
   send_queues_flag["event_info"] = "new";
