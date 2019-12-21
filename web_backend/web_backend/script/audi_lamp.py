@@ -336,7 +336,6 @@ def play_rev_data(data):
   global emer_data
   while(True):
     if emer_data["type"] == "caution":
-      #os.system("espeak -vzh 请接管 > /dev/null")
       os.system("sudo mplayer /home/pi/audio/take_over.MP3 >/dev/null")
       time.sleep(0.2)
     if data['audio']:

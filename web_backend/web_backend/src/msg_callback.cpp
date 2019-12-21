@@ -6,7 +6,7 @@ map<int,string> decision = {{0,"cur_lane"},{-1,"left_lane"},\
 extern map<string,AdUtil::ThreadSafeQueue<nlohmann::json>> send_queues;
 extern map<string,string> send_queues_flag;
 int drive_mode = 0, lamp_status = 0; 
-string kombi_ip = "192.168.1.136", pi_ip = "192.168.1.66";
+string kombi_ip = "192.168.1.136", pi_ip = "192.168.1.66", pi_ip2 = "192.168.1.65";
 
 void ctsCallback(const v2x::Cars_Status::ConstPtr msg){
   autodrive_msgs::CarStatus car_status;
@@ -272,18 +272,21 @@ void eventCallback(const autodrive_msgs::EventInfo::ConstPtr& msg)
   {
     lamp_status = 1;
     AdUtil::send_by_udp(pi_ip,9090,"data:0");
+    AdUtil::send_by_udp(pi_ip2,9090,"data:0");
     event_data["data"][0]["status"] = "off";
   }
   else if(msg->Reason == 2)
   {
     lamp_status = 7;
     AdUtil::send_by_udp(pi_ip,9090,"data:6");
+    AdUtil::send_by_udp(pi_ip2,9090,"data:6");
     event_data["data"][0]["status"] = "off";    
   }
   else if(msg->Reason == 3)
   {
     lamp_status = 2;
     AdUtil::send_by_udp(pi_ip,9090,"data:1");
+    AdUtil::send_by_udp(pi_ip2,9090,"data:1");
     event_data["data"][0]["status"] = "off"; 
   }
   else if(msg->Reason == 4 or msg->Reason == 5 or msg->Reason == 6)
@@ -306,6 +309,7 @@ void eventCallback(const autodrive_msgs::EventInfo::ConstPtr& msg)
       event_data["data"][0]["speed_limit"] = 80;
     }
     AdUtil::send_by_udp(pi_ip,9090,"data:1");
+    AdUtil::send_by_udp(pi_ip2,9090,"data:1");
     event_data["data"][0]["status"] = "on";
   }
   else if(msg->Reason > 6 and msg->Reason < 14)
@@ -314,11 +318,13 @@ void eventCallback(const autodrive_msgs::EventInfo::ConstPtr& msg)
     {
       lamp_status = 3;
       AdUtil::send_by_udp(pi_ip,9090,"data:2");
+      AdUtil::send_by_udp(pi_ip2,9090,"data:2");
     }
     if(msg->LeftOrRight == 1)
     {
       lamp_status = 4;
       AdUtil::send_by_udp(pi_ip,9090,"data:3");
+      AdUtil::send_by_udp(pi_ip2,9090,"data:3");
     } 
     if(msg->Reason == 10)
     {
@@ -338,18 +344,21 @@ void eventCallback(const autodrive_msgs::EventInfo::ConstPtr& msg)
   {
     lamp_status = 6;
     AdUtil::send_by_udp(pi_ip,9090,"data:5");
+    AdUtil::send_by_udp(pi_ip2,9090,"data:5");
     event_data["data"][0]["status"] = "on";
   }
   if(msg->Reason == 17)
   {
     lamp_status = 3;
     AdUtil::send_by_udp(pi_ip,9090,"data:2");
+    AdUtil::send_by_udp(pi_ip2,9090,"data:2");
     event_data["data"][0]["status"] = "off";
   }
   if(msg->Reason == 18)
   {
     lamp_status = 4;
     AdUtil::send_by_udp(pi_ip,9090,"data:3");
+    AdUtil::send_by_udp(pi_ip2,9090,"data:3");
     event_data["data"][0]["status"] = "off";
   } 
   send_queues["event_info"].Clear();
