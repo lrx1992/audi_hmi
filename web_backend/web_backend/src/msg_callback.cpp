@@ -146,6 +146,10 @@ void obsCallback(const autodrive_msgs::Obstacles::ConstPtr msg){
     obs_json["data"][obs_count]["orientation"]["y"]=obs.ObsTheta;
     obs_count++;
   }
+  if(obs_count == 0)
+  {
+    obs_json["data"] = {};
+  }
   send_queues["obs_info"].Clear();
   send_queues["obs_info"].Push(obs_json);
   send_queues_flag["obs_info"]="new";
