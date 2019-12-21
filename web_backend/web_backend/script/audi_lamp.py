@@ -45,14 +45,17 @@ def _signal_handler(signum, frame):
 def get_host_ip():
   try:
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(('8.8.8.8', 80))
     ip = s.getsockname()[0]
   finally:
     s.close()
   return ip
 
 BUFSIZE = 1024
+host_ip = get_host_ip()
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
-server_socket.bind((get_host_ip(),9090))
+server_socket.bind((host_ip,9090))
+send_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 
 def multiColorWipe(strip, color, dis_str, wait_ms=3,bias=0,equal=False):
   """Wipe color across multiple LED strips a pixel at a time."""
@@ -85,16 +88,14 @@ def multiColorWipe(strip, color, dis_str, wait_ms=3,bias=0,equal=False):
           strip.setPixelColor(i+bias, Color(0, 0, 0))
       strip.show()
       time.sleep(0.4)
-
-  elif dis_str == "<<<<":
+  elif (dis_str == "<<<<" and host_ip == "192.168.1.66") or (dis_str == ">>>>" and host_ip == "192.168.1.65"):
     blackout(strip)
     for i in range(strip.numPixels()):
       if i < bias: continue
       strip.setPixelColor(i, color)
       strip.show()
       time.sleep(0.01)
-
-  elif dis_str == ">>>>":
+  elif (dis_str == ">>>>" and host_ip == "192.168.1.66") or (dis_str == "<<<<" and host_ip == "192.168.1.65"):
     blackout(strip)
     for i in range(strip.numPixels(),0,-1):
       if i < bias: continue
@@ -212,7 +213,7 @@ def display_str(strip, str_to_dis, color):
             if (pos+1) == 63: pos=2 
     strip.show()
     time.sleep(0.3)
-  elif str_to_dis == "<<<<":
+  elif (str_to_dis == "<<<<" and host_ip == "192.168.1.66") or (str_to_dis == ">>>>" and host_ip == "192.168.1.65"):
     for char in char_list:
       if char in ascii_map.keys():
         seq_list = ascii_map[char]
@@ -230,7 +231,7 @@ def display_str(strip, str_to_dis, color):
       strip.show()  
       time.sleep(0.3)  
 
-  elif str_to_dis == ">>>>":
+  elif (str_to_dis == ">>>>" and host_ip == "192.168.1.66") or (str_to_dis == "<<<<" and host_ip == "192.168.1.65"):
     pos = (64 - len(str_to_dis)*6)/2 + len(str_to_dis)*6
     for char in char_list:
       if char in ascii_map.keys():
@@ -264,7 +265,7 @@ dis_str_list = ["HELLO","+%-","<<<<",">>>>","CAUTION",">STOP<","GOODBYE"]
 str_color_list = [Color(255, 255, 255),Color(66, 230, 205),Color(66, 230, 205),Color(66, 230, 205),
                   Color(255, 0, 0),Color(66, 230, 205),Color(255, 255, 255)]
 
-def rec_dis_data(data):
+def rec_dis_data(data,emer_data):
   while True:
     print("ready to receice data from port 9090")        
     rev_data,client_addr = server_socket.recvfrom(BUFSIZE)
@@ -277,11 +278,14 @@ def rec_dis_data(data):
       except Exception as e:
         data["bright"] = strip1.getBrightness()
     elif rev_data_list[0] == "audio":
-        data["audio"] = rev_data_list[1]
+      data["audio"] = rev_data_list[1]
+    elif rev_data_list[0] == "matrix":
+      emer_data["type"] = rev_data_list[1]
     print("receive data:",rev_data)
 
 def rec_serial_data(emer_data):
   try_count=0
+  emer_data_his = None
   while True:
     try:
       print "start receive data from serial data"
@@ -296,8 +300,13 @@ def rec_serial_data(emer_data):
         if len(ser_rec_data_list)<1 or ser_rec_data_list[0][-7:] != "$STATUS": continue
         if ser_rec_data_list[2][-1] == "1":
           emer_data["type"] = "caution"
+          if host_ip == "192.168.1.66":
+            send_socket.sendto("matrix:caution",("192.168.1.65",9090))
         else:
           emer_data["type"] = "normal"
+          if host_ip == "192.168.1.66" and emer_data_his == "caution":
+            send_socket.sendto("matrix:normal",("192.168.1.65",9090))
+        emer_data_his = emer_data["type"]
         time.sleep(0.1)
     except Exception as e:
       print e 
@@ -424,16 +433,17 @@ if __name__ == '__main__':
   print('Press Ctrl-C to quit.')
 
   if args.m==0:
-    p1 = multiprocessing.Process(target=rec_dis_data,args=(data,))
+    p1 = multiprocessing.Process(target=rec_dis_data,args=(data,emer_data))
     p1.start()
     p2 = multiprocessing.Process(target=to_dis_status)
     p2.start()
-    p3 = multiprocessing.Process(target=rec_serial_data,args=(emer_data,))
-    p3.start()
-    p4 = multiprocessing.Process(target=send_serial_data)
-    p4.start()
-    p5 = multiprocessing.Process(target=play_rev_data,args=(data,))
-    p5.start()
+    if host_ip == "192.168.1.66":
+      p3 = multiprocessing.Process(target=rec_serial_data,args=(emer_data,))
+      p3.start()
+      p4 = multiprocessing.Process(target=send_serial_data)
+      p4.start()
+      p5 = multiprocessing.Process(target=play_rev_data,args=(data,))
+      p5.start()
   else:
     while True:
       for i in range(len(dis_str_list)):
