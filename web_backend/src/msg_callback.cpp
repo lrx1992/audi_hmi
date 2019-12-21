@@ -227,8 +227,8 @@ void pointCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
     if(i % 12 == 0)
     { 
       PointOfCloud point(&(msg->data[pt_step * i]));
-      points_data["data"][display_point_cnt++] = -round(point.point.x*100)/100.0;
-      points_data["data"][display_point_cnt++] = -round(point.point.y*100)/100.0;
+      points_data["data"][display_point_cnt++] = round(point.point.x*100)/100.0;
+      points_data["data"][display_point_cnt++] = round(point.point.y*100)/100.0;
       points_data["data"][display_point_cnt++] = round(point.point.z*100)/100.0;
     }    
   }
