@@ -214,6 +214,7 @@ def display_str(strip, str_to_dis, color):
     strip.show()
     time.sleep(0.3)
   elif (str_to_dis == "<<<<" and host_ip == "192.168.1.66") or (str_to_dis == ">>>>" and host_ip == "192.168.1.65"):
+    if host_ip == "192.168.1.65": char_list = ["<","<","<","<"]
     for char in char_list:
       if char in ascii_map.keys():
         seq_list = ascii_map[char]
@@ -233,6 +234,7 @@ def display_str(strip, str_to_dis, color):
 
   elif (str_to_dis == ">>>>" and host_ip == "192.168.1.66") or (str_to_dis == "<<<<" and host_ip == "192.168.1.65"):
     pos = (64 - len(str_to_dis)*6)/2 + len(str_to_dis)*6
+    if host_ip == "192.168.1.65": char_list = [">",">",">",">"]
     for char in char_list:
       if char in ascii_map.keys():
         seq_list = ascii_map[char]
