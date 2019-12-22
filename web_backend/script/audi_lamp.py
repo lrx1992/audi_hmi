@@ -54,7 +54,7 @@ def get_host_ip():
 BUFSIZE = 1024
 host_ip = get_host_ip()
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
-server_socket.bind((host_ip,9090))
+server_socket.bind(("0.0.0.0",9090))
 send_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 
 def multiColorWipe(strip, color, dis_str, wait_ms=3,bias=0,equal=False):
