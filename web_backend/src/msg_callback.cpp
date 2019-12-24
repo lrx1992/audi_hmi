@@ -5,7 +5,7 @@ map<int,string> decision = {{0,"cur_lane"},{-1,"left_lane"},\
             {1,"right_lane"}};
 extern map<string,AdUtil::ThreadSafeQueue<nlohmann::json>> send_queues;
 extern map<string,string> send_queues_flag;
-int drive_mode = 0, lamp_status = 0; 
+int drive_mode = 0,  lamp_status = 0, drive_mode_his = -255; 
 string kombi_ip = "192.168.1.136", pi_ip = "192.168.1.66", pi_ip2 = "192.168.1.65";
 
 void ctsCallback(const v2x::Cars_Status::ConstPtr msg){
@@ -259,7 +259,21 @@ void timerCallback(const ros::TimerEvent& event,ros::Publisher& pub)
 
 void vhcCallback(const autodrive_msgs::VehicleStatus::ConstPtr& msg)
 {
-  drive_mode = msg->autodrive_mode;
+  drive_mode  = msg->autodrive_mode;
+ if (drive_mode  != drive_mode_his  )
+ {
+     if(drive_mode == 2)
+     {
+        AdUtil::send_by_udp(pi_ip,9090,"mode:auto");
+        AdUtil::send_by_udp(pi_ip2,9090,"mode:auto");
+     }
+     else
+     {
+        AdUtil::send_by_udp(pi_ip,9090,"mode:manual");
+        AdUtil::send_by_udp(pi_ip2,9090,"mode:manual");
+     }
+     drive_mode_his = drive_mode;
+ }
 }
 
 void eventCallback(const autodrive_msgs::EventInfo::ConstPtr& msg)

@@ -307,6 +307,9 @@ emer_data = multiprocessing.Manager().dict()
 emer_data['type'] = "normal" # "normal" or "caution"
 emer_data['data'] = None
 
+drive_mode = multiprocessing.Manager().dict()
+drive_mode['data'] = None
+
 #dis_str_list = ["HELLO","AUTOPILOT","<<<<",">>>>","CAUTION","PARKING","GOODBYE"]
 dis_str_list = ["HELLO","+%-","<<<<",">>>>","CAUTION",">STOP<","GOODBYE","MANUAL"]
 #dis_str_list_effect = ["=","+%-","<<<<",">>>>","*%/",">STOP<","GOODBYE"]
@@ -329,6 +332,8 @@ def rec_dis_data(data,emer_data):
       data["audio"] = rev_data_list[1]
     elif rev_data_list[0] == "matrix":
       emer_data["type"] = rev_data_list[1]
+    elif rev_data_list[0] == "mode":
+      drive_mode['data']= rev_data_list[1]
     print("receive data:",rev_data)
 
 def rec_serial_data(emer_data):
@@ -394,12 +399,14 @@ def play_rev_data(data):
 def to_dis_status():
   global data
   global emer_data
+  global drive_mode
   his_dis=None
   equal_flag=False
   dis_time = 0
   while True:
     #print data
     to_dis_data = data["data"]
+    if drive_mode['data'] == 'manual':  to_dis_data = '7'
     if emer_data['type'] == 'caution': to_dis_data = '4'
     if to_dis_data:
       if to_dis_data==his_dis:
@@ -480,7 +487,7 @@ if __name__ == '__main__':
   print('Press Ctrl-C to quit.')
 
   if args.m==0:
-    p1 = multiprocessing.Process(target=rec_dis_data,args=(data,emer_data))
+    p1 = multiprocessing.Process(target=rec_dis_data,args=(data,emer_data, drive_mode))
     p1.start()
     p2 = multiprocessing.Process(target=to_dis_status)
     p2.start()
