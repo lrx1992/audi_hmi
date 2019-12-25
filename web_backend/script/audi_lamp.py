@@ -316,7 +316,7 @@ dis_str_list = ["HELLO","+%-","<<<<",">>>>","CAUTION",">STOP<","GOODBYE","MANUAL
 str_color_list = [Color(255, 255, 255),Color(66, 230, 205),Color(66, 230, 205),Color(66, 230, 205),
                   Color(255, 0, 0),Color(66, 230, 205),Color(255, 255, 255),Color(255, 255, 255)]
 
-def rec_dis_data(data,emer_data):
+def rec_dis_data(data,emer_data, drive_mode):
   while True:
     print("ready to receice data from port 9090")        
     rev_data,client_addr = server_socket.recvfrom(BUFSIZE)

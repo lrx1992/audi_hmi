@@ -271,6 +271,7 @@ void vhcCallback(const autodrive_msgs::VehicleStatus::ConstPtr& msg)
      {
         AdUtil::send_by_udp(pi_ip,9090,"mode:manual");
         AdUtil::send_by_udp(pi_ip2,9090,"mode:manual");
+         lamp_status = 8;
      }
      drive_mode_his = drive_mode;
  }
@@ -383,6 +384,7 @@ void eventCallback(const autodrive_msgs::EventInfo::ConstPtr& msg)
     AdUtil::send_by_udp(pi_ip2,9090,"data:3");
     event_data["data"][0]["status"] = "off";
   } 
+  if(drive_mode != 2)   lamp_status = 8;
   send_queues["event_info"].Clear();
   send_queues["event_info"].Push(event_data);
   send_queues_flag["event_info"] = "new";
