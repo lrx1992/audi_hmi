@@ -81,7 +81,6 @@ class WebSocketRequestHandler : public HTTPRequestHandler {
       do{
         try {
           ws.receiveFrame(buffer, sizeof(buffer), flags);
-          if(buffer!="/status" )  cout <<"request.clientAddress(:"<<request.clientAddress().toString()<< "buffer:" << buffer<< "flags:"<<flags<< endl;
           if(string(buffer) == "startautopilot")
           {
             std_msgs::Char mode;
