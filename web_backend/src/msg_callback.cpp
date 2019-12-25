@@ -307,7 +307,7 @@ void eventCallback(const autodrive_msgs::EventInfo::ConstPtr& msg)
     AdUtil::send_by_udp(pi_ip2,9090,"data:1");
     event_data["data"][0]["status"] = "off"; 
   }
-  else if(msg->Reason == 4 or msg->Reason == 5 or msg->Reason == 6)
+  else if(msg->Reason == 4 or msg->Reason == 5 or msg->Reason == 6 or msg->Reason == 14)
   {
     lamp_status = 2;
     if(msg->Reason == 4)
@@ -325,6 +325,10 @@ void eventCallback(const autodrive_msgs::EventInfo::ConstPtr& msg)
     {
       speed_limit = 80;
       event_data["data"][0]["speed_limit"] = 80;
+    }
+    if(msg->Reason == 14)
+    {
+      AdUtil::send_by_udp(pi_ip,9090,"audio:pedestrian");
     }
     AdUtil::send_by_udp(pi_ip,9090,"data:1");
     AdUtil::send_by_udp(pi_ip2,9090,"data:1");
@@ -358,7 +362,7 @@ void eventCallback(const autodrive_msgs::EventInfo::ConstPtr& msg)
     }   
     event_data["data"][0]["status"] = "on";    
   }
-  else if(msg->Reason == 14 or msg->Reason == 15 or msg->Reason == 16)
+  else if(msg->Reason == 15 or msg->Reason == 16 or msg->Reason == 19)
   {
     lamp_status = 6;
     AdUtil::send_by_udp(pi_ip,9090,"data:5");
