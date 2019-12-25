@@ -52,7 +52,7 @@ def get_host_ip():
   return ip
 
 BUFSIZE = 1024
-host_ip = get_host_ip()
+host_ip = "192.168.1.66"
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
 server_socket.bind(("0.0.0.0",9090))
 send_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
