@@ -76,11 +76,12 @@ class WebSocketRequestHandler : public HTTPRequestHandler {
       ws.setSendTimeout(Poco::Timespan(5, 0));
       app.logger().information("WebSocket connection established.");
       char buffer[1024];
-      int flags=0;
+      int flags=-1;
       string front_mode ,status_his = "";
       do{
         try {
           ws.receiveFrame(buffer, sizeof(buffer), flags);
+          if(buffer!="/status" )  cout <<"request.clientAddress(:"<<request.clientAddress().toString()<< "buffer:" << buffer<< "flags:"<<flags<< endl;
           if(string(buffer) == "startautopilot")
           {
             std_msgs::Char mode;
@@ -144,7 +145,7 @@ class WebSocketRequestHandler : public HTTPRequestHandler {
           }
         }
       } while ((flags & WebSocket::FRAME_OP_BITMASK) !=
-               WebSocket::FRAME_OP_CLOSE);
+               WebSocket::FRAME_OP_CLOSE && flags!=0 );
       app.logger().information("WebSocket connection closed.");
     } catch (WebSocketException& exc) {
       app.logger().log(exc);
