@@ -266,6 +266,8 @@ void vhcCallback(const autodrive_msgs::VehicleStatus::ConstPtr& msg)
      {
         AdUtil::send_by_udp(pi_ip,9090,"mode:auto");
         AdUtil::send_by_udp(pi_ip2,9090,"mode:auto");
+        AdUtil::send_by_udp(pi_ip,9090,"data:1");
+        AdUtil::send_by_udp(pi_ip2,9090,"data:1");
         lamp_status = 2;
      }
      else
