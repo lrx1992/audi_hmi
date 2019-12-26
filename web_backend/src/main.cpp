@@ -256,8 +256,8 @@ int main(int argc, char** argv)
     send_queues.insert({"map_info",map_info_queue});
     send_queues_flag.insert({"map_info","old"});
 
-   // ros::Subscriber obsTraj = nh_.subscribe("/sensor/ibeo_front/objects",10,obsCallback);
-    ros::Subscriber obsTraj = nh_.subscribe("/obstacles_in_roi_tracked_global",10,obsCallback);
+    ros::Subscriber obsTraj = nh_.subscribe("/obstacles_in_roi_others",10,obsCallback);
+  //  ros::Subscriber obsTraj = nh_.subscribe("/obstacles_in_roi_tracked_global",10,obsCallback);
 
     AdUtil::ThreadSafeQueue<nlohmann::json> obs_info_queue;
     send_queues.insert({"obs_info",obs_info_queue});
