@@ -338,7 +338,15 @@ void eventCallback(const autodrive_msgs::EventInfo::ConstPtr& msg)
     AdUtil::send_by_udp(pi_ip2,9090,"data:1");
     event_data["data"][0]["status"] = "on";
   }
-  else if(msg->Reason > 6 and msg->Reason < 14)
+  else if(msg->Reason == 7)
+  {
+    lamp_status = 6;
+    AdUtil::send_by_udp(pi_ip,9090,"data:5");
+    AdUtil::send_by_udp(pi_ip2,9090,"data:5");
+    AdUtil::send_by_udp(pi_ip,9090,"audio:road_close");
+    event_data["data"][0]["status"] = "on";
+  }
+  else if(msg->Reason > 7 and msg->Reason < 14)
   {
     if(msg->LeftOrRight == -1) 
     {
