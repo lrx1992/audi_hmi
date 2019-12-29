@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 #include <map>
 #include "utils/point.h"
 using namespace std;
@@ -40,6 +41,7 @@ struct PointOfCloud{
 
 namespace AdUtil {
 std::string GetDefaultPageContent();
+std::vector<std::string> split(const std::string& str, const std::string& pattern);
 std::string RequestWSAddress(const Poco::Net::HTTPServerRequest& request);
 std::string RequestWebPage(const std::string& page_path);
 void QuaternionToRpy(QUATERNION_Type *q, float *roll, float *pitch, float *yaw);
