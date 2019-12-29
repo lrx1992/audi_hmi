@@ -115,9 +115,10 @@ class WebSocketRequestHandler : public HTTPRequestHandler {
         }
         if(front_mode == "/driverview" || front_mode == "/topview"){
           for(auto &send_queue : send_queues){
-            vector<string> ip_list = AdUtil::split(send_queues_flag[send_queue.first],",");
-            int exist_flag = std::count(ip_list.begin(),ip_list.end(),ip);
-            if(!send_queue.second.IsEmpty() && (send_queues_flag[send_queue.first]=="new" || exist_flag < 1)){
+            //vector<string> ip_list = AdUtil::split(send_queues_flag[send_queue.first],",");
+            //int exist_flag = std::count(ip_list.begin(),ip_list.end(),ip);
+         //   if(!send_queue.second.IsEmpty() && (send_queues_flag[send_queue.first]=="new" || exist_flag < 1)){
+            if(!send_queue.second.IsEmpty() && send_queues_flag[send_queue.first]=="new"){
               if(send_queue.first == "points_data" && front_mode == "/driverview")
                 continue;              
               auto json_str_list = send_queue.second.WaitGetAll();
@@ -128,14 +129,15 @@ class WebSocketRequestHandler : public HTTPRequestHandler {
               }
               if(send_queue.first!="event_info") 
               {
-                if(send_queues_flag[send_queue.first] == "new")
-                {
-                  send_queues_flag[send_queue.first] = ip+",";
-                }
-                else
-                {
-                  send_queues_flag[send_queue.first] += ip;
-                }
+                send_queues_flag[send_queue.first] = "old";
+                // if(send_queues_flag[send_queue.first] == "new")
+                // {
+                //   send_queues_flag[send_queue.first] = ip+",";
+                // }
+                // else
+                // {
+                //   send_queues_flag[send_queue.first] += ip;
+                // }
               }
             }
           }
