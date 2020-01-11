@@ -280,6 +280,50 @@ void vhcCallback(const autodrive_msgs::VehicleStatus::ConstPtr& msg)
  }
 }
 
+ModuleStatusDescription FindStatus(std::string name, int code, Parameters *parm){
+  if(parm->module_map_.find(name)!=parm->module_map_.end()){
+      if(parm->module_map_[name].find(code)!=parm->module_map_[name].end())
+        return parm->module_map_[name].find(code)->second;
+      else  return ModuleStatusDescription{"unknown status", "error"};
+  }
+  else  return ModuleStatusDescription{"unknown module", "error"};
+}
+
+void monitorCallback(const monitor::MonitorInfo::ConstPtr msg, Parameters *parm){
+  nlohmann::json monitor_json;
+  monitor_json["api"] = "/info_monitor";
+  monitor_json["action"] = msg->action;
+  monitor_json["cur_time"] = msg->cur_time;
+
+  for(int i=0; i<msg->sensors.size(); i++){
+    monitor_json["sensors"][i]["type"] = msg->sensors[i].type;
+    monitor_json["sensors"][i]["name"] = msg->sensors[i].name;
+    monitor_json["sensors"][i]["freq"] = msg->sensors[i].freq;
+    monitor_json["sensors"][i]["time_diff"] = msg->sensors[i].time_diff;
+    monitor_json["sensors"][i]["ip_connect_status"] = msg->sensors[i].ip_connect_status;
+    monitor_json["sensors"][i]["time_out_caution"] = msg->sensors[i].time_out_caution;
+  }
+
+  for(int i=0; i<msg->modules.size(); i++){
+    ModuleStatusDescription cur_modulestatus = FindStatus(msg->modules[i].name, msg->modules[i].status, parm);
+    monitor_json["modules"][i]["name"] = msg->modules[i].name;
+    monitor_json["modules"][i]["status_code"] = msg->modules[i].status;
+    monitor_json["modules"][i]["status"] = cur_modulestatus.status;
+    monitor_json["modules"][i]["freq"] = msg->modules[i].freq;
+    monitor_json["modules"][i]["time_diff"] = msg->modules[i].time_diff;
+    monitor_json["modules"][i]["time_out_caution"] = msg->modules[i].time_out_caution;
+    monitor_json["modules"][i]["action"] = cur_modulestatus.action; 
+    // cout<<"name: "<<monitor_json["modules"][i]["name"]<<
+    //       " code: "<< monitor_json["modules"][i]["status_code"]<<
+    //       " status: "<<monitor_json["modules"][i]["status"]<<
+    //       " action: "<<monitor_json["modules"][i]["action"]<<endl;
+  }
+
+  send_queues["monitor_info"].Clear();
+  send_queues["monitor_info"].Push(monitor_json);
+  send_queues_flag["monitor_info"]="new";
+}
+
 void eventCallback(const autodrive_msgs::EventInfo::ConstPtr& msg)
 {
   nlohmann::json event_data;

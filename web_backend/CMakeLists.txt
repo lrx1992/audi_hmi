@@ -29,6 +29,7 @@ add_executable(web_backend
                src/msg_callback.cpp
                src/point.cpp
                src/main.cpp
+               src/parameters.cpp
 )
 
 add_dependencies(web_backend ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -42,5 +43,6 @@ target_link_libraries(web_backend
   ${${PROJECT_NAME}_SOURCE_DIR}/third/libPocoJSON.a
   ${${PROJECT_NAME}_SOURCE_DIR}/third/libPocoFoundation.a
   pthread
+  yaml-cpp
 )
 

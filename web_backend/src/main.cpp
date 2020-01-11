@@ -21,6 +21,7 @@
 #include "utils/web_utils.h"
 #include "utils/msg_callback.h"
 #include <std_msgs/Char.h>
+#include <utils/parameters.h>
 
 using Poco::Net::HTTPResponse;
 using Poco::Net::HTTPRequestHandler;
@@ -115,9 +116,6 @@ class WebSocketRequestHandler : public HTTPRequestHandler {
         }
         if(front_mode == "/driverview" || front_mode == "/topview"){
           for(auto &send_queue : send_queues){
-            //vector<string> ip_list = AdUtil::split(send_queues_flag[send_queue.first],",");
-            //int exist_flag = std::count(ip_list.begin(),ip_list.end(),ip);
-         //   if(!send_queue.second.IsEmpty() && (send_queues_flag[send_queue.first]=="new" || exist_flag < 1)){
             if(!send_queue.second.IsEmpty() && send_queues_flag[send_queue.first]=="new"){
               if(send_queue.first == "points_data" && front_mode == "/driverview")
                 continue;              
@@ -130,14 +128,6 @@ class WebSocketRequestHandler : public HTTPRequestHandler {
               if(send_queue.first!="event_info") 
               {
                 send_queues_flag[send_queue.first] = "old";
-                // if(send_queues_flag[send_queue.first] == "new")
-                // {
-                //   send_queues_flag[send_queue.first] = ip+",";
-                // }
-                // else
-                // {
-                //   send_queues_flag[send_queue.first] += ip;
-                // }
               }
             }
           }
@@ -252,6 +242,7 @@ int main(int argc, char** argv)
     HTTPHMIServer app;
     ros::init(argc, argv, "web_backend",ros::init_options::NoSigintHandler);
     ros::NodeHandle nh_;
+    Parameters* parm = new Parameters;
     modePub = nh_.advertise<std_msgs::Char>("/autoDrive_KeyboardMode",1);
     ros::Subscriber vehicleSub = nh_.subscribe("/vehicle/status", 10, vhcCallback);
 
@@ -287,7 +278,12 @@ int main(int argc, char** argv)
     AdUtil::ThreadSafeQueue<nlohmann::json> event_info_queue;
     send_queues.insert({"event_info",event_info_queue});
     send_queues_flag.insert({"event_info","old"});
-    
+
+    ros::Subscriber monitorSub = nh_.subscribe<monitor::MonitorInfo>("/monitor/sensor_info", 10, boost::bind(monitorCallback, _1, parm));
+    AdUtil::ThreadSafeQueue<nlohmann::json> monitor_info_queue;
+    send_queues.insert({"monitor_info",monitor_info_queue});
+    send_queues_flag.insert({"monitor_info","old"});
+
     AdUtil::ThreadSafeQueue<nlohmann::json> traffic_sign_queue;
     send_queues.insert({"traffic_sign",traffic_sign_queue});
     send_queues_flag.insert({"traffic_sign","old"});
