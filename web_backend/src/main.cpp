@@ -98,8 +98,10 @@ class WebSocketRequestHandler : public HTTPRequestHandler {
             continue;
           }
           if(string(buffer).substr(0,8) == "/topview") front_mode = "/topview";
+          else if(string(buffer).substr(0,8) == "/monitor") front_mode = "/monitor";
           else front_mode = string(buffer);
-          if(front_mode == "/driverview" || front_mode == "/topview")
+          cout<<"front_mode: "<<front_mode<<endl;
+          if(front_mode == "/driverview" || front_mode == "/topview" || front_mode == "/monitor")
           {
             for(auto &send_queue : send_queues){
               if(!send_queue.second.IsEmpty()){
@@ -114,12 +116,18 @@ class WebSocketRequestHandler : public HTTPRequestHandler {
           }
         } catch (const Poco::TimeoutException& e) {
         }
-        if(front_mode == "/driverview" || front_mode == "/topview"){
+        if(front_mode == "/driverview" || front_mode == "/topview" || front_mode == "/monitor")
+        {
           for(auto &send_queue : send_queues){
-            if(!send_queue.second.IsEmpty() && send_queues_flag[send_queue.first]=="new"){
+            if(!send_queue.second.IsEmpty() && send_queues_flag[send_queue.first] == "new"){
               if(send_queue.first == "points_data" && front_mode == "/driverview")
-                continue;              
+                continue;
               auto json_str_list = send_queue.second.WaitGetAll();
+              if(send_queue.first!="event_info") 
+              {
+                cout<<"info: "<<send_queue.first<<endl;
+                cout<<"json_str_list size: "<<json_str_list.size()<<endl;
+              }
               for(auto &json_str : json_str_list)
               {
                 string str = json_str->dump();
@@ -132,7 +140,7 @@ class WebSocketRequestHandler : public HTTPRequestHandler {
             }
           }
         } 
-        if(front_mode == "/status" || front_mode == "/driverview" || front_mode == "/topview")
+        if(front_mode == "/status" || front_mode == "/driverview" || front_mode == "/topview" || front_mode == "/monitor")
         { 
           nlohmann::json status_json;
           status_json["api"] = "/status";
