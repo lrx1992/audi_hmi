@@ -48,17 +48,21 @@ public:
     void handleRequest(HTTPServerRequest& request, HTTPServerResponse& response)
     {
       std::string uri = request.getURI();
+      cout << "uri: " <<uri <<endl;
       if (uri == "/"){
+        cout<<"1111111111111"<<endl;
         Application& app = Application::instance();
         app.logger().information("Request from "+ request.clientAddress().toString()+request.getURI()+ request.getVersion());
         Poco::Timestamp now;
         std::string dt(Poco::DateTimeFormatter::format(now, _format));
         response.setChunkedTransferEncoding(true);
-        response.setContentType("text/json");
-        std::ostream& ostr = response.send();
-      }else{
+        response.setContentType("text/html");
         std::string content;
-        content = AdUtil::RequestWebPage("");
+        content = AdUtil::RequestWebPage("/home/zhaoxl/Documents/dist/index.html");
+        response.send() << content;
+        }else{
+        std::string content;
+        content = AdUtil::RequestWebPage("/home/zhaoxl/Documents/dist/index.html");
         response.send() << content;
       }
     }
@@ -123,8 +127,7 @@ class WebSocketRequestHandler : public HTTPRequestHandler {
               if(send_queue.first == "points_data" && front_mode == "/driverview")
                 continue;
               auto json_str_list = send_queue.second.WaitGetAll();
-              if(send_queue.first!="event_info") 
-              {
+              if(send_queue.first!="event_info") {
                 cout<<"info: "<<send_queue.first<<endl;
                 cout<<"json_str_list size: "<<json_str_list.size()<<endl;
               }
@@ -198,6 +201,7 @@ public:
       }
 
       auto request_method = request.getMethod();
+      cout<<"request_method "<<request_method<<endl;
       if (request_method == "GET"){
         return new HMIRequestHandler(_format);
       } else
@@ -254,8 +258,8 @@ int main(int argc, char** argv)
     modePub = nh_.advertise<std_msgs::Char>("/autoDrive_KeyboardMode",1);
     ros::Subscriber vehicleSub = nh_.subscribe("/vehicle/status", 10, vhcCallback);
 
-    ros::Subscriber carStatus = nh_.subscribe("/cars/status", 10, ctsCallback);
-    //ros::Subscriber carStatus = nh_.subscribe("/car/status", 10, ctsCallback);
+    // ros::Subscriber carStatus = nh_.subscribe("/cars/status", 10, ctsCallback);
+    ros::Subscriber carStatus = nh_.subscribe("/car/status", 10, carStatusCallback);
     AdUtil::ThreadSafeQueue<nlohmann::json> status_send_queue;
     send_queues.insert({"car_status",status_send_queue});
     send_queues_flag.insert({"car_status","old"});

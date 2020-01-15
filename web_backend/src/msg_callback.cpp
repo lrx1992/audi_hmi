@@ -8,78 +8,30 @@ extern map<string,string> send_queues_flag;
 int drive_mode = 0,  lamp_status = 0, drive_mode_his = -255; 
 string kombi_ip = "192.168.1.136", pi_ip = "192.168.1.66", pi_ip2 = "192.168.1.65";
 
-void ctsCallback(const v2x::Cars_Status::ConstPtr msg){
-  autodrive_msgs::CarStatus car_status;
-  nlohmann::json status_json;
-  for(int i = 0; i< 3; i++)
-  {
-    if(i==0)
-    {
-      car_status = msg->self_status;
-    }
-    else if(i==1)
-    {
-      if(msg->vehicle1_id == "") car_status = msg->self_status;
-      else car_status = msg->vehicle1_status;
-    }
-    else if(i==2)
-    {
-      if(msg->vehicle2_id == "") car_status = msg->self_status;
-      else car_status = msg->vehicle2_status;
-    }
-    float roll,pitch,yaw;
-    QUATERNION_Type quat = {car_status.orientation.x,car_status.orientation.y,\
-                            car_status.orientation.z,car_status.orientation.w};
-    AdUtil::QuaternionToRpy(&quat,&roll,&pitch,&yaw);
-    double time_sec = car_status.header.stamp.toSec();
-    status_json["api"] = "/info_car";
-    status_json["cars"][i]["id"] = i;  
-    status_json["cars"][i]["velocity"]["x"] = car_status.velocity.x;
-    status_json["cars"][i]["velocity"]["y"] = car_status.velocity.y;
-    status_json["cars"][i]["velocity"]["z"] = car_status.velocity.z;
-    status_json["cars"][i]["position"]["x"] = car_status.position.x;
-    status_json["cars"][i]["position"]["y"] = car_status.position.y;
-    status_json["cars"][i]["position"]["z"] = car_status.position.z;
-    status_json["cars"][i]["orientation"]["r"] = roll;
-    status_json["cars"][i]["orientation"]["p"] = pitch;
-    status_json["cars"][i]["orientation"]["y"] = yaw;
-
-    status_json["cars"][i]["steer_angle"] = car_status.steer_angle;
-    status_json["cars"][i]["left_trun_light"] = int(car_status.left_light_status);
-    status_json["cars"][i]["right_turn_light"] = int(car_status.right_light_status);
-    status_json["cars"][i]["brake_light_status"] = int(car_status.brake_light_status); 
-    if(i==0)
-    {
-      status_json["cars"][i]["car_flag"] = 2;
-      if(msg->self_leader_flag == 1) status_json["cars"][i]["car_flag"] = 3;
-    }
-    else
-    {
-      status_json["cars"][i]["car_flag"] = 0;
-      if(i==1 && msg->vehicle1_leader_flag==1) status_json["cars"][i]["car_flag"] = 1;
-      if(i==2 && msg->vehicle2_leader_flag==1) status_json["cars"][i]["car_flag"] = 1;
-    }
-    
-    status_json["cars"][i]["join_flag"] = 0;
-    status_json["cars"][i]["join_follow_flag"] = 0;
-    status_json["cars"][i]["dodge_flag"] = 0;
-  }
-  send_queues["car_status"].Clear();
-  send_queues["car_status"].Push(status_json);
-  send_queues_flag["car_status"] = "new";
-}
-
-// void ctsCallback(const autodrive_msgs::CarStatus::ConstPtr msg){
-//   autodrive_msgs::CarStatus car_status = *msg;
+// void ctsCallback(const v2x::Cars_Status::ConstPtr msg){
+//   autodrive_msgs::CarStatus car_status;
 //   nlohmann::json status_json;
-//   for(int i =0; i< 3; i++)
+//   for(int i = 0; i< 3; i++)
 //   {
+//     if(i==0)
+//     {
+//       car_status = msg->self_status;
+//     }
+//     else if(i==1)
+//     {
+//       if(msg->vehicle1_id == "") car_status = msg->self_status;
+//       else car_status = msg->vehicle1_status;
+//     }
+//     else if(i==2)
+//     {
+//       if(msg->vehicle2_id == "") car_status = msg->self_status;
+//       else car_status = msg->vehicle2_status;
+//     }
 //     float roll,pitch,yaw;
 //     QUATERNION_Type quat = {car_status.orientation.x,car_status.orientation.y,\
 //                             car_status.orientation.z,car_status.orientation.w};
 //     AdUtil::QuaternionToRpy(&quat,&roll,&pitch,&yaw);
 //     double time_sec = car_status.header.stamp.toSec();
-    
 //     status_json["api"] = "/info_car";
 //     status_json["cars"][i]["id"] = i;  
 //     status_json["cars"][i]["velocity"]["x"] = car_status.velocity.x;
@@ -91,17 +43,21 @@ void ctsCallback(const v2x::Cars_Status::ConstPtr msg){
 //     status_json["cars"][i]["orientation"]["r"] = roll;
 //     status_json["cars"][i]["orientation"]["p"] = pitch;
 //     status_json["cars"][i]["orientation"]["y"] = yaw;
+
 //     status_json["cars"][i]["steer_angle"] = car_status.steer_angle;
 //     status_json["cars"][i]["left_trun_light"] = int(car_status.left_light_status);
 //     status_json["cars"][i]["right_turn_light"] = int(car_status.right_light_status);
 //     status_json["cars"][i]["brake_light_status"] = int(car_status.brake_light_status); 
 //     if(i==0)
 //     {
-//       status_json["cars"][i]["car_flag"] = 3;
+//       status_json["cars"][i]["car_flag"] = 2;
+//       if(msg->self_leader_flag == 1) status_json["cars"][i]["car_flag"] = 3;
 //     }
 //     else
 //     {
 //       status_json["cars"][i]["car_flag"] = 0;
+//       if(i==1 && msg->vehicle1_leader_flag==1) status_json["cars"][i]["car_flag"] = 1;
+//       if(i==2 && msg->vehicle2_leader_flag==1) status_json["cars"][i]["car_flag"] = 1;
 //     }
     
 //     status_json["cars"][i]["join_flag"] = 0;
@@ -112,6 +68,37 @@ void ctsCallback(const v2x::Cars_Status::ConstPtr msg){
 //   send_queues["car_status"].Push(status_json);
 //   send_queues_flag["car_status"] = "new";
 // }
+
+void carStatusCallback(const autodrive_msgs::CarStatus::ConstPtr msg){
+  autodrive_msgs::CarStatus car_status = *msg;
+  nlohmann::json status_json;
+  float roll,pitch,yaw;
+  QUATERNION_Type quat = {car_status.orientation.x,car_status.orientation.y,\
+                          car_status.orientation.z,car_status.orientation.w};
+  AdUtil::QuaternionToRpy(&quat,&roll,&pitch,&yaw);
+  double time_sec = car_status.header.stamp.toSec();
+  
+  status_json["api"] = "/info_car";
+  status_json["car"]["id"] = car_status.id;
+  status_json["car"]["speed"] = car_status.speed;
+  status_json["car"]["velocity"]["x"] = car_status.velocity.x;
+  status_json["car"]["velocity"]["y"] = car_status.velocity.y;
+  status_json["car"]["velocity"]["z"] = car_status.velocity.z;
+  status_json["car"]["position"]["x"] = car_status.position.x;
+  status_json["car"]["position"]["y"] = car_status.position.y;
+  status_json["car"]["position"]["z"] = car_status.position.z;
+  status_json["car"]["orientation"]["r"] = roll;
+  status_json["car"]["orientation"]["p"] = pitch;
+  status_json["car"]["orientation"]["y"] = yaw;
+  status_json["car"]["steer_angle"] = car_status.steer_angle;
+  status_json["car"]["left_trun_light"] = int(car_status.left_light_status);
+  status_json["car"]["right_turn_light"] = int(car_status.right_light_status);
+  status_json["car"]["brake_light_status"] = int(car_status.brake_light_status); 
+
+  send_queues["car_status"].Clear();
+  send_queues["car_status"].Push(status_json);
+  send_queues_flag["car_status"] = "new";
+}
 
 void planCallback(const autodrive_msgs::PlanningTraj::ConstPtr msg){
   nlohmann::json plan_traj;
@@ -298,7 +285,7 @@ void monitorCallback(const monitor::MonitorInfo::ConstPtr msg, Parameters *parm)
   for(int i=0; i<msg->sensors.size(); i++){
     monitor_json["data"]["sensors"][i]["type"] = msg->sensors[i].type;
     monitor_json["data"]["sensors"][i]["name"] = msg->sensors[i].name;
-    monitor_json["data"]["sensors"][i]["freq"] = msg->sensors[i].freq;
+    monitor_json["data"]["sensors"][i]["freq"] = int(msg->sensors[i].freq);
     monitor_json["data"]["sensors"][i]["time_diff"] = msg->sensors[i].time_diff;
     monitor_json["data"]["sensors"][i]["ip_connect_status"] = msg->sensors[i].ip_connect_status;
     monitor_json["data"]["sensors"][i]["time_out_caution"] = msg->sensors[i].time_out_caution;
@@ -309,7 +296,7 @@ void monitorCallback(const monitor::MonitorInfo::ConstPtr msg, Parameters *parm)
     monitor_json["data"]["modules"][i]["name"] = msg->modules[i].name;
     monitor_json["data"]["modules"][i]["status_code"] = msg->modules[i].status;
     monitor_json["data"]["modules"][i]["status"] = cur_modulestatus.status;
-    monitor_json["data"]["modules"][i]["freq"] = msg->modules[i].freq;
+    monitor_json["data"]["modules"][i]["freq"] = int(msg->modules[i].freq);
     monitor_json["data"]["modules"][i]["time_diff"] = msg->modules[i].time_diff;
     monitor_json["data"]["modules"][i]["time_out_caution"] = msg->modules[i].time_out_caution;
     monitor_json["data"]["modules"][i]["action"] = cur_modulestatus.action; 

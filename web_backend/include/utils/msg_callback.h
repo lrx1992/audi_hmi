@@ -18,8 +18,8 @@
 #include "ros/ros.h"
 #include <utils/parameters.h>
 using namespace std;
-//void ctsCallback(const autodrive_msgs::CarStatus::ConstPtr msg);
-void ctsCallback(const v2x::Cars_Status::ConstPtr msg);
+void carStatusCallback(const autodrive_msgs::CarStatus::ConstPtr msg);
+// void ctsCallback(const v2x::Cars_Status::ConstPtr msg);
 void planCallback(const autodrive_msgs::PlanningTraj::ConstPtr msg);
 void mapCallback(const autodrive_msgs::LaneSection::ConstPtr msg);
 void obsCallback(const autodrive_msgs::Obstacles::ConstPtr msg);
