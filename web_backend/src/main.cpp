@@ -39,6 +39,11 @@ extern map<string,string> send_queues_flag;
 extern int drive_mode, lamp_status;
 ros::Publisher modePub;
 
+
+string fileType(string extention){
+    return extention.substr(extention.find_last_of('.') + 1);
+}
+
 class HMIRequestHandler: public HTTPRequestHandler
 {
 public:
@@ -48,9 +53,10 @@ public:
     void handleRequest(HTTPServerRequest& request, HTTPServerResponse& response)
     {
       std::string uri = request.getURI();
+      std::string file_type = fileType(uri);
       cout << "uri: " <<uri <<endl;
+      cout << "file_type: " <<file_type <<endl;
       if (uri == "/"){
-        cout<<"1111111111111"<<endl;
         Application& app = Application::instance();
         app.logger().information("Request from "+ request.clientAddress().toString()+request.getURI()+ request.getVersion());
         Poco::Timestamp now;
@@ -60,11 +66,26 @@ public:
         std::string content;
         content = AdUtil::RequestWebPage("/home/zhaoxl/Documents/dist/index.html");
         response.send() << content;
-        }else{
+      }
+      else if(file_type == "css"){
         std::string content;
-        content = AdUtil::RequestWebPage("/home/zhaoxl/Documents/dist/index.html");
+        response.setChunkedTransferEncoding(true);
+        response.setContentType("text/css");
+        content = AdUtil::RequestWebPage("/home/zhaoxl/Documents/dist" + uri);
         response.send() << content;
       }
+      else if(file_type == "wasm"){
+        std::string content;
+        response.setChunkedTransferEncoding(true);
+        response.setContentType("application/wasm");
+        content = AdUtil::RequestWebPage("/home/zhaoxl/Documents/dist" + uri);
+        response.send() << content;
+      }
+      else{
+        std::string content;
+        content = AdUtil::RequestWebPage("/home/zhaoxl/Documents/dist" + uri);
+        response.send() << content;
+      }          
     }
     private:
     std::string _format;
@@ -127,10 +148,6 @@ class WebSocketRequestHandler : public HTTPRequestHandler {
               if(send_queue.first == "points_data" && front_mode == "/driverview")
                 continue;
               auto json_str_list = send_queue.second.WaitGetAll();
-              if(send_queue.first!="event_info") {
-                cout<<"info: "<<send_queue.first<<endl;
-                cout<<"json_str_list size: "<<json_str_list.size()<<endl;
-              }
               for(auto &json_str : json_str_list)
               {
                 string str = json_str->dump();
@@ -258,7 +275,6 @@ int main(int argc, char** argv)
     modePub = nh_.advertise<std_msgs::Char>("/autoDrive_KeyboardMode",1);
     ros::Subscriber vehicleSub = nh_.subscribe("/vehicle/status", 10, vhcCallback);
 
-    // ros::Subscriber carStatus = nh_.subscribe("/cars/status", 10, ctsCallback);
     ros::Subscriber carStatus = nh_.subscribe("/car/status", 10, carStatusCallback);
     AdUtil::ThreadSafeQueue<nlohmann::json> status_send_queue;
     send_queues.insert({"car_status",status_send_queue});

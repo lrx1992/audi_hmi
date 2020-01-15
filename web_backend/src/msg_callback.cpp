@@ -301,7 +301,7 @@ void monitorCallback(const monitor::MonitorInfo::ConstPtr msg, Parameters *parm)
     monitor_json["data"]["modules"][i]["time_out_caution"] = msg->modules[i].time_out_caution;
     monitor_json["data"]["modules"][i]["action"] = cur_modulestatus.action; 
   }
-  cout<<"monitor_json.size(): "<<monitor_json.size()<<endl;
+
   send_queues["monitor_info"].Clear();
   send_queues["monitor_info"].Push(monitor_json);
   send_queues_flag["monitor_info"] = "new";
